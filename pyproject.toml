@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "attestify-langgraph"
-version = "0.1.0"
-description = "LangGraph node integration for Attestify — governed AI loop execution, receipts, and audit trails"
+version = "0.2.0"
+description = "LangGraph node integration for Attestify — governed AI loop execution, receipts, audit trails, and Attestify Trust (no-wallet agent identity + signed evidence)"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
-keywords = ["attestify", "langgraph", "ai-agents", "receipts", "governance", "x402"]
+keywords = ["attestify", "langgraph", "ai-agents", "receipts", "governance", "x402", "trust", "agent-identity"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -24,11 +24,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "langchain-openai"]
+trust = ["cryptography>=41.0.0"]
 
 [project.urls]
-Homepage = "https://attestifyos.com"
-Repository = "https://github.com/attestifyagent/attestify-os"
-Documentation = "https://attestifyos.com/docs"
+Homepage = "https://attestifyos.com/trust"
+Repository = "https://github.com/attestifyagent/attestify-langgraph"
+Documentation = "https://attestifyos.com/docs#trust"
 
 [tool.hatch.build.targets.wheel]
 packages = ["attestify_langgraph"]

@@ -1,12 +1,14 @@
 # attestify-langgraph
 
-> Governed AI loop execution for [LangGraph](https://langchain-ai.github.io/langgraph/) — signed receipts, audit trails, and x402 payments on Base.
+> Governed AI loop execution for [LangGraph](https://langchain-ai.github.io/langgraph/) — signed receipts, audit trails, x402 payments on Base, and [Attestify Trust](https://attestifyos.com/trust) (no-wallet agent identity + signed evidence).
 
 ## Installation
 
 ```bash
 pip install attestify-langgraph
 ```
+
+Trust tools additionally need `cryptography` — install with `pip install attestify-langgraph[trust]`; everything else works without it.
 
 ## Usage — State Node
 
@@ -69,11 +71,45 @@ When using `make_attestify_tools`, the following are also available as graph-cal
 | `attestify_get_recent_loops` | List recent loop receipts for this tenant |
 | `attestify_get_control_tower` | Live governance data (Enterprise only) |
 | `attestify_query_governance_docs` | Semantic search over Attestify's governance docs |
+| `attestify_trust_submit_evidence` | Sign and submit evidence of real work — free, no wallet (Trust configured) |
+| `attestify_trust_verify` | Independently verify any Trust receipt by ID — public, no key |
+
+## Attestify Trust — no-wallet agent identity + signed evidence
+
+A separate concern from the Router tools above: no x402, no lanes, no spend. Register once, then the graph can sign proof of what it actually did.
+
+```python
+from attestify_langgraph import provision_trust_agent, make_attestify_tools
+from attestify_langgraph._http import _Client
+import os
+
+# ONE TIME, outside any graph run — never let the graph call this itself.
+# A fresh identity per run breaks the agent's own verified-active streak
+# and adds noise to Attestify's public census instead of a real number.
+creds = provision_trust_agent(
+    api_key=os.environ["ATTESTIFY_API_KEY"],
+    display_name="LangGraph Agent",
+    framework="langgraph",
+)
+print(f"Store these — TRUST_AGENT_ID={creds['agent_id']}  TRUST_PRIVATE_KEY={creds['private_key']}")
+
+# From then on, with those two env vars set, make_attestify_tools() picks
+# them up automatically and adds attestify_trust_submit_evidence and
+# attestify_trust_verify to the returned tool list.
+client = _Client(api_key=os.environ["ATTESTIFY_API_KEY"])
+tools  = make_attestify_tools(client)
+```
+
+The private key is bound once at tool-build time — it's never a tool parameter, so it never enters the graph's own state or a checkpoint.
+
+## Getting Your API Key
+
+Subscribe at [attestifyos.com/pricing](https://attestifyos.com/pricing) for Router access, or register free for Trust-only use at [attestifyos.com/trust](https://attestifyos.com/trust) — no card required.
 
 ## Links
 
-- [Attestify OS](https://attestify-os.vercel.app)
-- [Documentation](https://attestify-os.vercel.app/docs)
-- [Get an API key](https://attestify-os.vercel.app/dashboard)
-- [MCP Package](../../mcp-package/)
-- [GitHub](https://github.com/attestifyagent/attestify-os)
+- [Attestify OS](https://attestifyos.com)
+- [Attestify Trust](https://attestifyos.com/trust)
+- [Documentation](https://attestifyos.com/docs)
+- [Get an API key](https://attestifyos.com/dashboard)
+- [GitHub](https://github.com/attestifyagent/attestify-langgraph)

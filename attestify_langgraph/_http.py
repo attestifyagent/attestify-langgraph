@@ -29,6 +29,10 @@ class _Client:
         data = json.dumps(payload).encode()
         return self._send(urllib.request.Request(f"{self._base_url}{path}", data=data, headers=self._headers(), method="POST"), path)
 
+    def get_public(self, path):
+        """GET with no X-API-Key header -- for Trust's public verify endpoint."""
+        return self._send(urllib.request.Request(f"{self._base_url}{path}", headers={"Content-Type": "application/json"}, method="GET"), path)
+
     def _send(self, req, path):
         last_exc = None
         for _ in range(self._max_retries + 1):
